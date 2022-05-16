@@ -89,6 +89,8 @@ function frame(){
 	window.requestAnimationFrame(frame);
 }
 function draw(){
+	ctx.fillStyle = 'white';
+	ctx.fillRect(0,0,canvas.width,canvas.height);
 	ctx.drawImage(puppy,0,0);
 	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
 	
@@ -175,8 +177,8 @@ function dither(imageData){
 		let qError = imageDataBackup[pixel] - imageData[pixel];
 		
 		imageData[pixel+4] += qError * (7/16);
-		imageData[pixel+canvas.width-1] += qError * (3/16);
-		imageData[pixel+canvas.width] += qError * (5/16);
-		imageData[pixel+canvas.width+1] += qError * (1/16);
+		imageData[pixel+(canvas.width * 4)-4] += qError * (3/16);
+		imageData[pixel+(canvas.width * 4)] += qError * (5/16);
+		imageData[pixel+(canvas.width * 4)+4] += qError * (1/16);
 	}
 }
