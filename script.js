@@ -2,6 +2,8 @@
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 
+let currentImage = [];
+
 let sourceX = 0;
 let sourceY = 0;
 
@@ -72,6 +74,8 @@ puppy.onload = function(){
 	canvas.width = puppy.width;
 	canvas.height = puppy.height;
 	
+	recreateImages();
+	
 	frame();
 }
 let modifierType = 0;
@@ -84,12 +88,20 @@ window.addEventListener('keydown', e => {
 		if(modifierType < 0){
 			modifierType = types.length - 1;
 		}
+		if(modifierType == 1)
+			recreateThreshhold();
+		else
+			recreateQuantize();
 	}
 	else if(keyname === 'Digit2'){
 		modifierType++;
 		if(modifierType > types.length - 1){
 			modifierType = 0;
 		}
+		if(modifierType == 1)
+			recreateThreshhold();
+		else
+			recreateQuantize();
 	}
 	else if(keyname === 'ArrowUp'){
 		if(modifierType == 1){
@@ -98,12 +110,14 @@ window.addEventListener('keydown', e => {
 			if(THRESHHOLDLIMIT > 1){
 				THRESHHOLDLIMIT = 1;
 			}
+			recreateThreshhold();
 		}
 		else if(modifierType == 2 || modifierType == 3 || modifierType == 5 || modifierType == 6){
 			NUMOFBITS++;
 			if(NUMOFBITS > 8){
 				NUMOFBITS = 8;
 			}
+			recreateQuantize();
 		}
 	}
 	else if(keyname === 'ArrowDown'){
@@ -113,19 +127,66 @@ window.addEventListener('keydown', e => {
 			if(THRESHHOLDLIMIT < 0){
 				THRESHHOLDLIMIT = 0;
 			}
+			recreateThreshhold();
 		}
 		else if(modifierType == 2 || modifierType == 3 || modifierType == 5 || modifierType == 6){
 			NUMOFBITS--;
 			if(NUMOFBITS < 1){
 				NUMOFBITS = 1;
 			}
+			recreateQuantize();
 		}
 	}
 	document.getElementById('modType').innerHTML = `Modifier Type: ${types[modifierType]}`;
 	document.getElementById('threshValue').innerHTML = `Threshhold Value: ${THRESHHOLDLIMIT}`;
 	document.getElementById('numBits').innerHTML = `Number of Bits: ${NUMOFBITS}`;
 });
-
+function recreateImages(){
+	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
+	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	currentImage[0] = imageData;
+	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	threshhold(imageData);
+	currentImage[1] = imageData;
+	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	quanitze(imageData);
+	currentImage[2] = imageData;
+	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	colorDither(imageData);
+	currentImage[3] = imageData;
+	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	greyscale(imageData);
+	currentImage[4] = imageData;
+	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	quantizeGrey(imageData);
+	currentImage[5] = imageData;
+	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	greyDither(imageData);
+	currentImage[6] = imageData;
+}
+function recreateThreshhold(){
+	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
+	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	threshhold(imageData);
+	currentImage[1] = imageData;
+}
+function recreateQuantize(){
+	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
+	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	
+	if(modifierType == 2)
+		quanitze(imageData);
+	else if(modifierType == 3)
+		colorDither(imageData);
+	else if(modifierType == 4)
+		greyscale(imageData);
+	else if(modifierType == 5)
+		quantizeGrey(imageData);
+	else if(modifierType == 6)
+		greyDither(imageData);
+	
+	currentImage[modifierType] = imageData;
+}
 //called on page load
 function init(){
 	//called only once
@@ -138,37 +199,14 @@ function frame(){
 	window.requestAnimationFrame(frame);
 }
 function draw(){
-	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
-	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	
 	ctx.fillStyle = 'white';
 	ctx.fillRect(0,0,canvas.width,canvas.height);
-	if(modifierType == 0){
-		//do nothing
-	}
-	else if(modifierType == 1){
-		threshhold(imageData);
-	}
-	else if(modifierType == 2){
-		quanitze(imageData);
-	}
-	else if(modifierType == 3){
-		colorDither(imageData);
-	}
-	else if(modifierType == 4){
-		greyscale(imageData);
-	}
-	else if(modifierType == 5){
-		quantizeGrey(imageData);
-	}
-	else if(modifierType == 6){
-		greyDither(imageData);
-	}
+	
 	//draw new image
 	let newCanvas = document.createElement('canvas');
 	newCanvas.width = canvas.width;
 	newCanvas.height = canvas.height;
-	newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+	newCanvas.getContext("2d").putImageData(currentImage[modifierType], 0, 0);
 	
 	ctx.drawImage(newCanvas,sourceX,sourceY,canvas.width*zoomScale,canvas.height*zoomScale);
 }
