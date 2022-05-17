@@ -9,14 +9,19 @@
 	<h1>Image Manipulator</h1>
 		<canvas id="myCanvas" width="1" height="1"></canvas>
 		<p>Please select an image file then click Start</p>
-		<input id="file" type="file"/>
+		<input id="file" type="file" accept="image/*"/>
 		<button id="button">Evaluate</button>
-		<script src="./script.js" onload="init()"></script>
-		<p>Use 1 and 2 to switch modes. Use up and down arrow to adjust values.</p>
+		<p id="status">Status: Waiting</p>
 		<p id="modType">Modifier Type: Normal</p>
 		<br>
 		<p id="threshValue">Threshhold Value: 0.5</p>
 		<p id="numBits">Number of Bits: 2</p>
+		<br>
 		<button id="rimg">Reset Canvas</button>
+		<button id="download">Download Image</button>
+		<h3>Controls</h3>
+		<p>Use 1 and 2 to switch modes. Use up and down arrow to adjust values.</p>
+		<p>You can click and drag to pan the image. You can scroll to zoom.</p>
+		<script src="./script.js" onload="init()"></script>
 	</body>
 </html>

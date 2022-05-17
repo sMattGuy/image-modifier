@@ -2,6 +2,7 @@
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 
+let statusMessage = document.getElementById("status");
 let currentImage = [];
 
 let sourceX = 0;
@@ -12,6 +13,35 @@ let prevY = 0;
 let zoomScale = 1;
 
 let holdingMouse = false;
+
+let modifierType = 0;
+let types = ['Normal','Threshhold','Quantize Color','Dither Color','Greyscale','Quantize Greyscale','Dither Greyscale'];
+
+let THRESHHOLDLIMIT = 0.50;
+let NUMOFBITS = 2;
+
+/*
+	These are the image functions
+	They control what happens after an image successfully loads
+*/
+let puppy = new Image();
+puppy.onload = function(){
+	canvas.width = puppy.width;
+	canvas.height = puppy.height;
+	
+	recreateImages();
+	
+	statusMessage.innerHTML = "Status: Complete.";
+	frame();
+}
+puppy.onerror = function(){
+	statusMessage.innerHTML = "Status: Error. Image could not be read.";
+}
+
+/*
+	These are the canvas event listeners
+	They handle moving the mouse and zooming with scrolling
+*/
 canvas.addEventListener('mousemove', e => {
 	if(holdingMouse){
 		sourceX += e.offsetX - prevX;
@@ -42,47 +72,46 @@ canvas.addEventListener('wheel', e => {
 		}
 	}
 });
-let THRESHHOLDLIMIT = 0.50;
-let NUMOFBITS = 2;
 
-let puppy = new Image();
-
-function getBase64(file){
-	let reader = new FileReader();
-	reader.readAsDataURL(file);
-	reader.onload = function(){
-		puppy.src = reader.result;
-	};
-	reader.onerror = function(error){
-		console.log('Error: ', error);
-	};
-}
+/*
+	These are the window event listeners
+	They handle responding to the page being loaded, and when a key is pressed
+*/
 window.onload = function(){
-	document.getElementById('button').addEventListener('click', function() {
+	document.getElementById('button').addEventListener('click', function(){
 		let files = document.getElementById('file').files;
 		if (files.length > 0){
+			statusMessage.innerHTML = "Status: Loading...";
 			getBase64(files[0]);
 		}
+		function getBase64(file){
+			let reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = function(){
+				puppy.src = reader.result;
+			};
+			reader.onerror = function(error){
+				console.log('Error: ', error);
+			};
+		}
 	});
-	document.getElementById('rimg').addEventListener('click', function() {
+	document.getElementById('rimg').addEventListener('click', function(){
 		sourceX = 0;
 		sourceY = 0;
 		zoomScale = 1;
 	});
+	document.getElementById('download').addEventListener('click', function(){
+		const link = document.createElement('a');
+		link.download = 'download.png';
+		link.href = canvas.toDataURL();
+		link.click();
+		link.delete;
+	});
 }
-puppy.onload = function(){
-	canvas.width = puppy.width;
-	canvas.height = puppy.height;
-	
-	recreateImages();
-	
-	frame();
-}
-let modifierType = 0;
-let types = ['Normal','Threshhold','Quantize Color','Dither Color','Greyscale','Quantize Greyscale','Dither Greyscale'];
 
 window.addEventListener('keydown', e => {
 	const keyname = e.code;
+	statusMessage.innerHTML = "Status: Loading...";
 	if(keyname === 'Digit1'){
 		modifierType--;
 		if(modifierType < 0){
@@ -137,10 +166,16 @@ window.addEventListener('keydown', e => {
 			recreateQuantize();
 		}
 	}
+	statusMessage.innerHTML = "Status: Complete.";
 	document.getElementById('modType').innerHTML = `Modifier Type: ${types[modifierType]}`;
 	document.getElementById('threshValue').innerHTML = `Threshhold Value: ${THRESHHOLDLIMIT}`;
 	document.getElementById('numBits').innerHTML = `Number of Bits: ${NUMOFBITS}`;
 });
+
+/*
+	These 3 helper functions create the images to be drawn based on the modifier value
+	They only update when something changes, otherwise the image stays cached
+*/
 function recreateImages(){
 	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
 	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
@@ -187,6 +222,11 @@ function recreateQuantize(){
 	
 	currentImage[modifierType] = imageData;
 }
+
+/*
+	These are the initial functions that do the basic tasks
+	These tasks include the initial run, the calling of frame, and drawing the screen
+*/
 //called on page load
 function init(){
 	//called only once
@@ -210,6 +250,12 @@ function draw(){
 	
 	ctx.drawImage(newCanvas,sourceX,sourceY,canvas.width*zoomScale,canvas.height*zoomScale);
 }
+
+
+/*
+	All functions below here are for doing the image modification
+	These functions need to be called above in order to actually run
+*/
 function greyscale(imageData){
 	for(let i=0;i<imageData.data.length;i+=4){
 		let avgPixels = (0.2162*imageData.data[i])+(0.7152*imageData.data[i+1])+(0.0722*imageData.data[i+2]);
