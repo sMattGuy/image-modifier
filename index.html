@@ -6,10 +6,17 @@
 		 <link rel="stylesheet" href="./style.css">
 	</head>
 	<body>
+	<h1>Image Manipulator</h1>
 		<canvas id="myCanvas" width="1" height="1"></canvas>
 		<p>Please select an image file then click Start</p>
 		<input id="file" type="file"/>
 		<button id="button">Evaluate</button>
 		<script src="./script.js" onload="init()"></script>
+		<p>Use 1 and 2 to switch modes. Use up and down arrow to adjust values.</p>
+		<p id="modType">Modifier Type: Normal</p>
+		<br>
+		<p id="threshValue">Threshhold Value: 0.5</p>
+		<p id="numBits">Number of Bits: 2</p>
+		<button id="rimg">Reset Canvas</button>
 	</body>
 </html>
