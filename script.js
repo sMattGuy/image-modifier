@@ -117,20 +117,14 @@ window.addEventListener('keydown', e => {
 		if(modifierType < 0){
 			modifierType = types.length - 1;
 		}
-		if(modifierType == 1)
-			recreateThreshhold();
-		else
-			recreateQuantize();
+		recreateImages()
 	}
 	else if(keyname === 'Digit2'){
 		modifierType++;
 		if(modifierType > types.length - 1){
 			modifierType = 0;
 		}
-		if(modifierType == 1)
-			recreateThreshhold();
-		else
-			recreateQuantize();
+		recreateImages();
 	}
 	else if(keyname === 'ArrowUp'){
 		if(modifierType == 1){
@@ -139,14 +133,14 @@ window.addEventListener('keydown', e => {
 			if(THRESHHOLDLIMIT > 1){
 				THRESHHOLDLIMIT = 1;
 			}
-			recreateThreshhold();
+			recreateImages();
 		}
 		else if(modifierType == 2 || modifierType == 3 || modifierType == 5 || modifierType == 6){
 			NUMOFBITS++;
 			if(NUMOFBITS > 8){
 				NUMOFBITS = 8;
 			}
-			recreateQuantize();
+			recreateImages();
 		}
 	}
 	else if(keyname === 'ArrowDown'){
@@ -156,14 +150,14 @@ window.addEventListener('keydown', e => {
 			if(THRESHHOLDLIMIT < 0){
 				THRESHHOLDLIMIT = 0;
 			}
-			recreateThreshhold();
+			recreateImages();
 		}
 		else if(modifierType == 2 || modifierType == 3 || modifierType == 5 || modifierType == 6){
 			NUMOFBITS--;
 			if(NUMOFBITS < 1){
 				NUMOFBITS = 1;
 			}
-			recreateQuantize();
+			recreateImages();
 		}
 	}
 	statusMessage.innerHTML = "Status: Complete.";
@@ -173,43 +167,16 @@ window.addEventListener('keydown', e => {
 });
 
 /*
-	These 3 helper functions create the images to be drawn based on the modifier value
+	This helper function create the images to be drawn based on the modifier value
 	They only update when something changes, otherwise the image stays cached
 */
 function recreateImages(){
 	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
 	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	currentImage[0] = imageData;
-	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	threshhold(imageData);
-	currentImage[1] = imageData;
-	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	quanitze(imageData);
-	currentImage[2] = imageData;
-	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	colorDither(imageData);
-	currentImage[3] = imageData;
-	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	greyscale(imageData);
-	currentImage[4] = imageData;
-	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	quantizeGrey(imageData);
-	currentImage[5] = imageData;
-	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	greyDither(imageData);
-	currentImage[6] = imageData;
-}
-function recreateThreshhold(){
-	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
-	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-	threshhold(imageData);
-	currentImage[1] = imageData;
-}
-function recreateQuantize(){
-	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
-	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
 	
-	if(modifierType == 2)
+	if(modifierType == 1)
+		threshhold(imageData);
+	else if(modifierType == 2)
 		quanitze(imageData);
 	else if(modifierType == 3)
 		colorDither(imageData);
