@@ -20,6 +20,10 @@ let types = ['Normal','Threshhold','Quantize Color','Dither Color','Greyscale','
 let THRESHHOLDLIMIT = 0.50;
 let NUMOFBITS = 2;
 
+let redRemove = 255 - parseInt(document.getElementById('redVal').value);
+let greenRemove = 255 - parseInt(document.getElementById('greenVal').value);
+let blueRemove = 255 - parseInt(document.getElementById('blueVal').value);
+
 /*
 	These are the image functions
 	They control what happens after an image successfully loads
@@ -107,6 +111,13 @@ window.onload = function(){
 		link.click();
 		link.delete;
 	});
+	document.getElementById('subVals').addEventListener('click', function(){
+		redRemove = 255 - parseInt(document.getElementById('redVal').value);
+		greenRemove = 255 - parseInt(document.getElementById('greenVal').value);
+		blueRemove = 255 - parseInt(document.getElementById('blueVal').value);
+		recreateThreshhold();
+		recreateQuantize();
+	});
 }
 
 window.addEventListener('keydown', e => {
@@ -179,35 +190,50 @@ window.addEventListener('keydown', e => {
 function recreateImages(){
 	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
 	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	currentImage[0] = imageData;
+	
 	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	threshhold(imageData);
 	currentImage[1] = imageData;
+	
 	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	quanitze(imageData);
 	currentImage[2] = imageData;
+	
 	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	colorDither(imageData);
 	currentImage[3] = imageData;
+	
 	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	greyscale(imageData);
 	currentImage[4] = imageData;
+	
 	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	quantizeGrey(imageData);
 	currentImage[5] = imageData;
+	
 	imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	greyDither(imageData);
 	currentImage[6] = imageData;
 }
 function recreateThreshhold(){
 	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
 	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	threshhold(imageData);
 	currentImage[1] = imageData;
 }
 function recreateQuantize(){
 	ctx.drawImage(puppy,0,0,canvas.width,canvas.height);
 	let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+	removeColor(imageData);
 	
 	if(modifierType == 2)
 		quanitze(imageData);
@@ -233,7 +259,6 @@ function init(){
 }
 //called every 1/60 of a second
 function frame(){
-	
 	//draws main screen
 	draw();
 	window.requestAnimationFrame(frame);
@@ -256,6 +281,13 @@ function draw(){
 	All functions below here are for doing the image modification
 	These functions need to be called above in order to actually run
 */
+function removeColor(imageData){
+	for(let i=0;i<imageData.data.length;i+=4){
+		imageData.data[i] -= redRemove;
+		imageData.data[i+1] -= greenRemove;
+		imageData.data[i+2] -= blueRemove;
+	}
+}
 function greyscale(imageData){
 	for(let i=0;i<imageData.data.length;i+=4){
 		let avgPixels = (0.2162*imageData.data[i])+(0.7152*imageData.data[i+1])+(0.0722*imageData.data[i+2]);
